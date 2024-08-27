@@ -2,4 +2,4 @@ streamlit
 requests
 pyperclip
 python-dotenv
-google-generative-ai
+google-generativeai
