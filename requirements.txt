@@ -1,0 +1,5 @@
+streamlit
+requests
+pyperclip
+python-dotenv
+google-generative-ai

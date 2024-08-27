@@ -1,11 +1,8 @@
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, Field
 import google.generativeai as genai
 import os 
 import streamlit as st
 from dotenv import load_dotenv
 import pyperclip
-app = FastAPI()
 
 load_dotenv()
 
@@ -15,26 +12,40 @@ API_KEY=os.getenv('API_KEY')
 genai.configure(api_key=API_KEY)
 model = genai.GenerativeModel('gemini-1.5-flash')
 
-
 # Function to copy text to the clipboard
-def copy_to_clipboard(text):
-    pyperclip.copy(text)
-    st.success("Text copied to clipboard!")
-    st.session_state.show_popup = True
 
-    # Check if the pop-up should be shown
-    if st.session_state.get('show_popup', False):
-        st.write("<div style='background-color: #f0f0f5; padding: 20px; border-radius: 5px;'>This is the message in the pop-up</div>", unsafe_allow_html=True)
-        if st.button("Close"):
-            st.session_state.show_popup = False
+cont=""
+custom_style = f"""
+
+        <style>
+            .custom-text-area {{
+                width: 100%;
+                height: 500px;
+                border: 1px solid #ddd;
+                padding: 10px;
+                background-color: #f9f9f9;
+                color: black;
+                font-family: sans-serif;
+                font-size: 14px;
+                overflow-y: auto;
+                box-sizing: border-box;
+            }}
+            .custom-text-area:disabled {{
+                background-color: #f9f9f9;
+                cursor: not-allowed;
+            }}
+        </style>
+        <textarea class="custom-text-area" disabled>{cont}</textarea>
+"""
 
 # Function to display a card with optional actions
 def display_card_with_actions(content, title):
     if content:
         st.title(title)
-        st.text_area(label="Result", value=content, height=800, key="text_area", disabled=True)
-
-
+        st.write(content)
+        if st.button("Copy text"):
+            pyperclip.copy(content)
+            st.write("Successfully copied")
 def call_gemini(option,prompt):
     new_prompt=prompt
     if option=="summary":
@@ -55,7 +66,7 @@ def call_gemini(option,prompt):
     """
     
     response = model.generate_content(new_prompt)
-        
+     
     return response.text
 
 # Streamlit UI
@@ -87,11 +98,11 @@ st.write("Words are mightier than the sword ....")
 st.sidebar.title("Features")
 feature = st.sidebar.selectbox(
     "Choose a feature:",
-    ["Summarize Your Points", "Correct Grammar", "Info About Any Topic"]
+    ["Summarize Your Notes", "Correct Grammar", "Info About Any Topic"]
 )
 
-if feature == "Summarize Your Points":
-    st.header("Summarize Your Points")
+if feature == "Summarize Your Notes":
+    st.header("Summarize Your Notes")
     text_to_summarize = st.text_area("Enter text to summarize")
     if st.button("Summarize"):
         if text_to_summarize:
